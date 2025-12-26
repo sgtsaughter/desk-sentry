@@ -1,0 +1,46 @@
+<div class="pose-detection-container">
+  <h2>Desk Sentry - Posture Monitor</h2>
+
+  <div class="video-container">
+    <!-- Hidden video element (receives webcam feed) -->
+    <video
+      #videoElement
+      class="input-video"
+      autoplay
+      playsinline>
+    </video>
+
+    <!-- Canvas element (displays video + skeleton overlay) -->
+    <canvas
+      #canvasElement
+      class="output-canvas"
+      width="1280"
+      height="720">
+    </canvas>
+
+    <!-- Posture score overlay -->
+
+
+    <div class="posture-overlay" *ngIf="currentPosture && isAnalyzing">
+      <div class="score-card" [class]="currentPosture.status">
+        <div class="posture-mode">{{ currentPosture.posture === 'sitting' ? '💺 Sitting' : '🧍 Standing' }}</div>
+        <div class="score-number">{{ currentPosture.score }}</div>
+        <div class="score-label">Posture Score</div>
+        <div class="status-message">{{ currentPosture.message }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info">
+    <div class="status-indicator" *ngIf="isAnalyzing">
+      <span class="indicator-dot" [class]="currentPosture?.status"></span>
+      <span>Monitoring active</span>
+    </div>
+    <div class="instructions">
+      <p><strong>Color Guide:</strong></p>
+      <p>🟢 Green = Good posture (75-100)</p>
+      <p>🟠 Orange = Fair posture (50-74)</p>
+      <p>🔴 Red = Poor posture (0-49)</p>
+    </div>
+  </div>
+</div>
