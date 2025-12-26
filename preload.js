@@ -1,11 +1,16 @@
 // preload.js - Electron Preload Script
 // This file runs before the renderer process loads and can expose safe APIs
 
-// Currently empty - we'll use this later for secure communication between
-// the main process (Node.js) and renderer process (Angular)
-// This is needed for features like:
-// - Sending posture data from Angular to main process
-// - Triggering screen blur from main process
-// - System tray interactions
+const { contextBridge, ipcRenderer } = require('electron');
+
+// Expose protected methods that allow the renderer process to use
+// ipcRenderer without exposing the entire object
+contextBridge.exposeInMainWorld('electronAPI', {
+  // Send notification request to main process
+  sendNotification: (data) => ipcRenderer.send('show-notification', data),
+
+  // Listen for events from main process (if needed later)
+  onNotificationClick: (callback) => ipcRenderer.on('notification-clicked', callback)
+});
 
 console.log('Preload script loaded');

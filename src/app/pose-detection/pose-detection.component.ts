@@ -25,6 +25,11 @@ export class PoseDetectionComponent implements OnInit, OnDestroy {
   currentPosture: PostureAnalysis | null = null;
   isAnalyzing = false;
 
+  // Notification throttling
+  private lastNotificationTime = 0;
+  private notificationCooldown = 60000; // 1 minute between notifications
+  private lastPostureStatus: 'good' | 'fair' | 'poor' | null = null;
+
   constructor(
     private postureService: PostureService,
     private cdr: ChangeDetectorRef
@@ -102,6 +107,23 @@ export class PoseDetectionComponent implements OnInit, OnDestroy {
       this.currentPosture = this.postureService.analyzePosture(results.poseLandmarks);
       this.isAnalyzing = true;
 
+      // Check if posture improved - reset notification cooldown
+      if (this.currentPosture) {
+        if (this.lastPostureStatus === 'poor' && this.currentPosture.status !== 'poor') {
+          // Posture improved from poor to fair/good - reset cooldown
+          this.lastNotificationTime = 0;
+          console.log('Posture improved - notification cooldown reset');
+        }
+        
+        // Update last status
+        this.lastPostureStatus = this.currentPosture.status;
+
+        // Check if we should send a notification
+        if (this.currentPosture.status === 'poor') {
+          this.checkAndSendNotification(this.currentPosture);
+        }
+      }
+
       // Choose color based on posture quality
       let skeletonColor = '#00FF00'; // Green for good posture
       if (this.currentPosture) {
@@ -133,5 +155,39 @@ export class PoseDetectionComponent implements OnInit, OnDestroy {
 
     // Trigger Angular change detection
     this.cdr.detectChanges();
+  }
+
+  /**
+   * Check if we should send a notification and send it
+   * Implements cooldown to avoid notification spam
+   */
+  private checkAndSendNotification(posture: PostureAnalysis): void {
+    const now = Date.now();
+
+    // Check if enough time has passed since last notification
+    if (now - this.lastNotificationTime < this.notificationCooldown) {
+      return; // Still in cooldown period
+    }
+
+    // Check if Electron API is available (we're in Electron, not browser)
+    if (typeof window !== 'undefined' && (window as any).electronAPI) {
+      (window as any).electronAPI.sendNotification({
+        title: 'Desk Sentry Alert',
+        body: `${posture.message} (Score: ${posture.score})`,
+        urgency: 'normal'
+      });
+
+      this.lastNotificationTime = now;
+      console.log('Notification sent: Poor posture detected');
+    } else {
+      // Fallback for browser/dev mode - use browser notifications
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Desk Sentry Alert', {
+          body: posture.message,
+          icon: '/assets/tray-icon-posture.png'
+        });
+        this.lastNotificationTime = now;
+      }
+    }
   }
 }

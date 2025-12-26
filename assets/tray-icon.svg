@@ -1,0 +1,24 @@
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#4CAF50"/>
+
+  <!-- Simple person icon representing posture -->
+  <g fill="white">
+    <!-- Head -->
+    <circle cx="32" cy="20" r="6"/>
+
+    <!-- Body -->
+    <rect x="28" y="27" width="8" height="16" rx="2"/>
+
+    <!-- Arms -->
+    <rect x="20" y="30" width="8" height="3" rx="1.5"/>
+    <rect x="36" y="30" width="8" height="3" rx="1.5"/>
+
+    <!-- Legs -->
+    <rect x="27" y="43" width="4" height="10" rx="2"/>
+    <rect x="33" y="43" width="4" height="10" rx="2"/>
+  </g>
+
+  <!-- Checkmark overlay (good posture indicator) -->
+  <path d="M 48 14 L 45 17 L 42 14 L 40 16 L 45 21 L 50 16 Z" fill="#FFC107"/>
+</svg>
